@@ -12,21 +12,24 @@ import (
 )
 
 type twitresult struct {
+	Id   int64
 	User string `json:"from_user"`
 	Text string
 	Time string `json:"created_at"`
 }
 type twitresp struct {
-	Results []twitresult
+	MaxId      int64  `json:"max_id"`
+	RefreshUrl string `json:"refresh_url"`
+	Results    []twitresult
 }
 
 var resnum = flag.IntP("number", "n", 20, "number of items to return")
 var reverse = flag.BoolP("reverse", "r", false, "reverse order")
+var follow = flag.BoolP("follow", "f", false, "follow mode")
+var followDelay = flag.DurationP("followdelay", "F", time.Minute, "refresh delay in follow mode")
 
-func twitsearch(search string) (twitresp, error) {
+func twitsearch(query string) (twitresp, error) {
 	var tw twitresp
-	search = url.QueryEscape(search)
-	query := fmt.Sprintf("http://search.twitter.com/search.json?q=%s&rpp=%d", search, *resnum)
 	resp, err := http.Get(query)
 	defer resp.Body.Close()
 	dec := json.NewDecoder(resp.Body)
@@ -35,7 +38,7 @@ func twitsearch(search string) (twitresp, error) {
 }
 
 var fixes = strings.NewReplacer(
-	"\n",`\n`,
+	"\n", `\n`,
 	"‘", `'`,
 	"’", `'`,
 	"“", `"`,
@@ -53,23 +56,33 @@ func main() {
 	if len(flag.Args()) == 0 {
 		log.Fatal("need query")
 	}
-	tw, err := twitsearch(strings.Join(flag.Args(), " "))
-	if err != nil {
-		log.Fatal(err)
-	}
+	search := url.QueryEscape(strings.Join(flag.Args(), " "))
+	query := fmt.Sprintf("http://search.twitter.com/search.json?q=%s&rpp=%d", search, *resnum)
 
-	if !*reverse {
-		r := tw.Results
-		for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
-			r[i], r[j] = r[j], r[i]
+	for {
+		tw, err := twitsearch(query)
+		if err != nil {
+			log.Fatal(err)
 		}
-	}
+		query = fmt.Sprintf("http://search.twitter.com/search.json%s", tw.RefreshUrl)
 
-	for _, r := range tw.Results {
-		t, _ := time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", r.Time)
-		tnice := t.Local().Format("Mon 15:04")
-		
-		text:=fixes.Replace(r.Text)
-		fmt.Printf("[%s] <%s> %s\n", tnice, r.User, text)
+		if !*reverse {
+			r := tw.Results
+			for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
+				r[i], r[j] = r[j], r[i]
+			}
+		}
+
+		for _, r := range tw.Results {
+			t, _ := time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", r.Time)
+			tnice := t.Local().Format("Mon 15:04")
+
+			text := fixes.Replace(r.Text)
+			fmt.Printf("[%s] <%s> %s\n", tnice, r.User, text)
+		}
+		if !*follow {
+			break
+		}
+		time.Sleep(*followDelay)
 	}
 }
