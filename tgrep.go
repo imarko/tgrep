@@ -25,6 +25,7 @@ type twitresp struct {
 
 var resnum = flag.IntP("number", "n", 20, "number of items to return")
 var reverse = flag.BoolP("reverse", "r", false, "reverse order")
+var retweets = flag.BoolP("retweets", "R", false, "include retweeets")
 var follow = flag.BoolP("follow", "f", false, "follow mode")
 var followDelay = flag.DurationP("followdelay", "F", time.Minute, "refresh delay in follow mode")
 
@@ -56,23 +57,26 @@ func main() {
 	if len(flag.Args()) == 0 {
 		log.Fatal("need query")
 	}
-	search := url.QueryEscape(strings.Join(flag.Args(), " "))
-	query := fmt.Sprintf("http://search.twitter.com/search.json?q=%s&rpp=%d", search, *resnum)
 
+	args := flag.Args()
+
+	if !*retweets {
+		args = append(args, "-rt")
+	}
+	search := url.QueryEscape(strings.Join(args, " "))
+	query := fmt.Sprintf("http://search.twitter.com/search.json?q=%s&rpp=%d", search, *resnum)
 	for {
 		tw, err := twitsearch(query)
 		if err != nil {
 			log.Fatal(err)
 		}
 		query = fmt.Sprintf("http://search.twitter.com/search.json%s", tw.RefreshUrl)
-
 		if !*reverse {
 			r := tw.Results
 			for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
 				r[i], r[j] = r[j], r[i]
 			}
 		}
-
 		for _, r := range tw.Results {
 			t, _ := time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", r.Time)
 			tnice := t.Local().Format("Mon 15:04")
