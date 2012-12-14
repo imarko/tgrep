@@ -29,7 +29,7 @@ var retweets = flag.BoolP("retweets", "R", false, "include retweeets")
 var follow = flag.BoolP("follow", "f", false, "follow mode")
 var followDelay = flag.DurationP("followdelay", "F", time.Minute, "refresh delay in follow mode")
 
-func twitsearch(query string) (twitresp, error) {
+func twitquery(query string) (twitresp, error) {
 	var tw twitresp
 	resp, err := http.Get(query)
 	defer resp.Body.Close()
@@ -66,7 +66,7 @@ func main() {
 	search := url.QueryEscape(strings.Join(args, " "))
 	query := fmt.Sprintf("http://search.twitter.com/search.json?q=%s&rpp=%d", search, *resnum)
 	for {
-		tw, err := twitsearch(query)
+		tw, err := twitquery(query)
 		if err != nil {
 			log.Fatal(err)
 		}
