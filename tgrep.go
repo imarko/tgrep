@@ -55,9 +55,12 @@ func (tw twitresult) String() string {
 func twitquery(query string) (twitresp, error) {
 	var tw twitresp
 	resp, err := http.Get(query)
+	if err != nil {
+		return tw, err
+	}
 	defer resp.Body.Close()
 	dec := json.NewDecoder(resp.Body)
-	dec.Decode(&tw)
+	err=dec.Decode(&tw)
 	return tw, err
 }
 
