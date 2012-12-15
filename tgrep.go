@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	flag "github.com/ogier/pflag"
+	flag "github.com/ogier/pflag" // friendlier than the built-in
 	"log"
 	"net/http"
 	"net/url"
@@ -77,14 +77,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if !*reverse {
-			r := tw.Results
-			for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
-				r[i], r[j] = r[j], r[i]
+		r := tw.Results
+		for i := range r {
+			if *reverse {
+				fmt.Println(r[i])
+			} else {
+				fmt.Println(r[len(r)-i-1])
 			}
-		}
-		for _, r := range tw.Results {
-			fmt.Println(r)
 		}
 		if !*follow {
 			break
