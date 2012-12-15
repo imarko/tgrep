@@ -1,8 +1,9 @@
 tgrep - a cli tool for searching twitter 
 
+# make sure your GOPATH is set, e.g. export GOPATH=$HOME/go
 go get github.com/imarko/tgrep
 
-tgrep -f '#golang' 
+$GOPATH/bin/tgrep -f '#golang' 
 
 Usage of tgrep:
   -f, --follow=false: follow mode
