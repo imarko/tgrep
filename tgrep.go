@@ -30,7 +30,7 @@ var follow = flag.BoolP("follow", "f", false, "follow mode")
 var followDelay = flag.DurationP("followdelay", "F", time.Minute, "refresh delay in follow mode")
 
 var fixes = strings.NewReplacer(
-	"\n", `\n`,
+	"\n", ` \n `, // spaces to make c&p easier
 	"‘", `'`,
 	"’", `'`,
 	"“", `"`,
