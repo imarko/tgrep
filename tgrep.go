@@ -23,6 +23,8 @@ type twitresp struct {
 	Results    []twitresult
 }
 
+const twSearchBase = "http://search.twitter.com/search.json"
+
 var resnum = flag.IntP("number", "n", 20, "number of items to return")
 var reverse = flag.BoolP("reverse", "r", false, "reverse order")
 var retweets = flag.BoolP("retweets", "R", false, "include retweeets")
@@ -64,14 +66,12 @@ func main() {
 	if len(flag.Args()) == 0 {
 		log.Fatal("need query")
 	}
-
 	args := flag.Args()
-
 	if !*retweets {
 		args = append(args, "-rt")
 	}
 	search := url.QueryEscape(strings.Join(args, " "))
-	query := fmt.Sprintf("http://search.twitter.com/search.json?q=%s&rpp=%d", search, *resnum)
+	query := fmt.Sprintf("%s?q=%s&rpp=%d", twSearchBase, search, *resnum)
 	for {
 		tw, err := twitquery(query)
 		if err != nil {
@@ -85,10 +85,10 @@ func main() {
 				fmt.Println(r[len(r)-i-1])
 			}
 		}
-		if !*follow {
+		if !*follow { // if not in follow mode we are done
 			break
 		}
-		query = fmt.Sprintf("http://search.twitter.com/search.json%s", tw.RefreshUrl)
+		query = twSearchBase + tw.RefreshUrl
 		time.Sleep(*followDelay)
 	}
 }
