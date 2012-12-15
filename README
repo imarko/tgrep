@@ -1,0 +1,13 @@
+tgrep - a cli tool for searching twitter 
+
+go get github.com/imarko/tgrep
+
+tgrep -f '#golang' 
+
+Usage of /home/mi/go/bin/tgrep:
+  -f, --follow=false: follow mode
+  -F, --followdelay=1m0s: refresh delay in follow mode
+  -n, --number=20: number of items to return
+  -R, --retweets=false: include retweeets
+  -r, --reverse=false: reverse order
+
