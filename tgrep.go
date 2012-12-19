@@ -12,13 +12,11 @@ import (
 )
 
 type twitresult struct {
-	Id   int64
 	User string `json:"from_user"`
 	Text string
 	Time string `json:"created_at"`
 }
 type twitresp struct {
-	MaxId      int64  `json:"max_id"`
 	RefreshUrl string `json:"refresh_url"`
 	Results    []twitresult
 }
