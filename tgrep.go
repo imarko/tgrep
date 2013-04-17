@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -43,10 +44,28 @@ var fixes = strings.NewReplacer(
 	"&apos;", "'",
 )
 
+var tco_url_re = regexp.MustCompile(`http://t\.co/[0-9A-Za-z0-9]+`)
+
+func tco_resolve(url string) string {
+	tr := &http.Transport{}
+	req, _ := http.NewRequest("HEAD", url, nil)
+	res, err := tr.RoundTrip(req)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	loc,_:=res.Location()
+	if loc != nil {
+		return loc.String()
+	}
+	return url
+}
+
 func (tw twitresult) String() string {
 	t, _ := time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", tw.Time)
 	tnice := t.Local().Format("Mon 15:04")
 	text := fixes.Replace(tw.Text)
+	text = tco_url_re.ReplaceAllStringFunc(text, tco_resolve)
 	return fmt.Sprintf("[%s] <%s> %s", tnice, tw.User, text)
 }
 
@@ -58,7 +77,7 @@ func twitquery(query string) (twitresp, error) {
 	}
 	defer resp.Body.Close()
 	dec := json.NewDecoder(resp.Body)
-	err=dec.Decode(&tw)
+	err = dec.Decode(&tw)
 	return tw, err
 }
 
