@@ -35,6 +35,7 @@ var reverse = flag.BoolP("reverse", "r", false, "reverse order")
 var retweets = flag.BoolP("retweets", "R", false, "include retweeets")
 var follow = flag.BoolP("follow", "f", false, "follow mode")
 var followDelay = flag.DurationP("followdelay", "F", time.Minute, "refresh delay in follow mode")
+var lang = flag.StringP("lang", "l", "", "limit to language")
 
 var fixes = strings.NewReplacer(
 	"\n", ` \n `, // spaces to make c&p easier
@@ -87,7 +88,7 @@ func main() {
 		args = append(args, "-rt")
 	}
 	search := url.QueryEscape(strings.Join(args, " "))
-	query := fmt.Sprintf("%s?q=%s&count=%d", twSearchBase, search, *resnum)
+	query := fmt.Sprintf("%s?q=%s&count=%d&lang=%s", twSearchBase, search, *resnum, *lang)
 	for {
 		tw, err := twitquery(query)
 		if err != nil {
