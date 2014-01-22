@@ -21,7 +21,7 @@ type twstatus struct {
 }
 
 type twmeta struct {
-	RefreshUrl string `json:"refresh_url"`
+	RefreshURL string `json:"refresh_url"`
 }
 type twitresp struct {
 	Statuses []twstatus
@@ -105,7 +105,7 @@ func main() {
 		if !*follow { // if not in follow mode we are done
 			break
 		}
-		query = twSearchBase + tw.Meta.RefreshUrl
+		query = twSearchBase + tw.Meta.RefreshURL
 		time.Sleep(*followDelay)
 	}
 }
