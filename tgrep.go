@@ -3,29 +3,28 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	flag "github.com/ogier/pflag" // friendlier than the built-in
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	flag "github.com/ogier/pflag" // friendlier than the built-in
 )
 
-type twuser struct {
-	Name string `json:"screen_name"`
-}
 type twstatus struct {
-	User twuser
+	User struct {
+		Name string `json:"screen_name"`
+	}
 	Text string
 	Time string `json:"created_at"`
 }
 
-type twmeta struct {
-	RefreshURL string `json:"refresh_url"`
-}
 type twitresp struct {
 	Statuses []twstatus
-	Meta     twmeta `json:"search_metadata"`
+	Meta     struct {
+		RefreshURL string `json:"refresh_url"`
+	} `json:"search_metadata"`
 }
 
 const twSearchBase = "https://api.twitter.com/1.1/search/tweets.json"
@@ -60,9 +59,9 @@ func (tw twstatus) String() string {
 
 func twitquery(query string) (twitresp, error) {
 	var tw twitresp
-	auth:="Bearer "+twtoken
-	client:=&http.Client{}
-	req,_ := http.NewRequest("GET", query, nil)
+	auth := "Bearer " + twtoken
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", query, nil)
 	req.Header.Set("Authorization", auth)
 	resp, err := client.Do(req)
 	if err != nil {
@@ -75,7 +74,6 @@ func twitquery(query string) (twitresp, error) {
 }
 
 func oauth() {
-
 }
 
 func main() {
