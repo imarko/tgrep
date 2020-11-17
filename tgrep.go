@@ -105,7 +105,6 @@ func main() {
 			break
 		}
 		query = twSearchBase + tw.Meta.RefreshURL + "&tweet_mode=extended"
-		fmt.Println(query)
 		time.Sleep(*followDelay)
 	}
 }
