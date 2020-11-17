@@ -16,8 +16,9 @@ type twstatus struct {
 	User struct {
 		Name string `json:"screen_name"`
 	}
-	Text string
-	Time string `json:"created_at"`
+	Text     string
+	FullText string `json:"full_text"`
+	Time     string `json:"created_at"`
 }
 
 type twitresp struct {
@@ -53,7 +54,7 @@ var fixes = strings.NewReplacer(
 func (tw twstatus) String() string {
 	t, _ := time.Parse("Mon Jan 2 15:04:05 -0700 2006", tw.Time)
 	tnice := t.Local().Format("Mon 15:04")
-	text := fixes.Replace(tw.Text)
+	text := fixes.Replace(tw.FullText)
 	return fmt.Sprintf("[%s] <%s> %s", tnice, tw.User.Name, text)
 }
 
@@ -86,7 +87,7 @@ func main() {
 		args = append(args, "-rt")
 	}
 	search := url.QueryEscape(strings.Join(args, " "))
-	query := fmt.Sprintf("%s?q=%s&count=%d&lang=%s", twSearchBase, search, *resnum, *lang)
+	query := fmt.Sprintf("%s?q=%s&count=%d&lang=%s&tweet_mode=extended", twSearchBase, search, *resnum, *lang)
 	for {
 		tw, err := twitquery(query)
 		if err != nil {
@@ -103,7 +104,8 @@ func main() {
 		if !*follow { // if not in follow mode we are done
 			break
 		}
-		query = twSearchBase + tw.Meta.RefreshURL
+		query = twSearchBase + tw.Meta.RefreshURL + "&tweet_mode=extended"
+		fmt.Println(query)
 		time.Sleep(*followDelay)
 	}
 }
