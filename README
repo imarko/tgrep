@@ -1,3 +1,8 @@
+No longer works with the Twitter APIs gone.
+
+RIP Twitter
+
+
 tgrep - a cli tool for searching twitter 
 
 # make sure your GOPATH is set, e.g. export GOPATH=$HOME/go
